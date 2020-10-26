@@ -151,6 +151,12 @@ module.exports = {
     compress: true, // 启用gzip压缩运行代码
     port:3000,
     open: true, // 默认浏览器
+    proxy: {
+      "/api": {
+        target: 'http://localhost:3000', // 浏览器之间存在跨域问题，服务器之间不存在跨域问题
+        pathRewrite:{'/api':''} // /api/xxx 去掉/api路径  
+      }
+    }, //服务器5000接收到/api/xxx的请求，会转发到另一个服务器
     hot: true // 开启hmr热更新模式
   },
   /** 
@@ -159,9 +165,19 @@ module.exports = {
    */
   optimization: {
     splitChunks: {
-      chunks: 'all'
+      chunks: 'all',
+      minSize: 30*1024, // 分割的chunk最小为30kb
+      maxSzie: 0, // 没有最大限制
+      
     }
   }, // 单页面应用代码分割
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname,"src/static"),// 路径别名
+      extensions: ['.js','json'],//配置省略文件路径的后缀名
+
+    }
+  },
   mode: 'development', //如果改成Production 模式 那么则必须加publicPath 不否图片泽园访问不到
   // mode: 'production'
 };
