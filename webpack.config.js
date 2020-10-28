@@ -1,3 +1,8 @@
+/**
+ * webapack 代码打包工具
+ * 概念： 1，entry: 入口、2，output：输出、3，loader: 加载器（webpack只能处理js，其他类型的文件需要引入其他模块去处理）、4，plugin：插件（增强webpack功能）、5，模式（运行环境）
+ */
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 通过 npm 安装
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 提取css成单独未见减少js文件体积
@@ -136,29 +141,16 @@ module.exports = {
       */
       filename: 'css/bundle.css' // 重命名s输出css文件
     }),
-    new WorkboxWebpackPlugin.GenerateSW({
-      /**帮助service worker 快速启动
-       * 删除酒店的serviceworker 
-       * 生成serviceworker 配置文件
-       */
-      clientsClaim: true,
-      skipWaiting: true
-    })
+    // new WorkboxWebpackPlugin.GenerateSW({
+    //   /**帮助service worker 快速启动
+    //    * 删除酒店的serviceworker 
+    //    * 生成serviceworker 配置文件
+    //    */
+    //   clientsClaim: true,
+    //   skipWaiting: true
+    // })
   ],
-  // devServer 自动化编译，打开浏览器，更新浏览器
-  devServer: { 
-    contentBase: path.resolve(__dirname,"dist"), // 要运行的目录
-    compress: true, // 启用gzip压缩运行代码
-    port:3000,
-    open: true, // 默认浏览器
-    proxy: {
-      "/api": {
-        target: 'http://localhost:3000', // 浏览器之间存在跨域问题，服务器之间不存在跨域问题
-        pathRewrite:{'/api':''} // /api/xxx 去掉/api路径  
-      }
-    }, //服务器5000接收到/api/xxx的请求，会转发到另一个服务器
-    hot: true // 开启hmr热更新模式
-  },
+
   /** 
    * 将某个node_module中的代码单独打包成一个chunk最终输出 主要时将第三方拿出来，自己的代码放一起
    * 如果有超过几十kb公共代码/模块 它会只打包成一个 （多页面应用）
@@ -166,18 +158,17 @@ module.exports = {
   optimization: {
     splitChunks: {
       chunks: 'all',
-      minSize: 30*1024, // 分割的chunk最小为30kb
-      maxSzie: 0, // 没有最大限制
-      
+      // minSize: 30*1024, // 分割的chunk最小为30kb
+      // maxSzie: 0, // 没有最大限制
     }
   }, // 单页面应用代码分割
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname,"src/static"),// 路径别名
-      extensions: ['.js','json'],//配置省略文件路径的后缀名
+  // resolve: {
+  //   alias: {
+  //     '@': path.resolve(__dirname,"src/static"),// 路径别名
+  //     extensions: ['.js','json'],//配置省略文件路径的后缀名
 
-    }
-  },
+  //   }
+  // },
   mode: 'development', //如果改成Production 模式 那么则必须加publicPath 不否图片泽园访问不到
   // mode: 'production'
 };
