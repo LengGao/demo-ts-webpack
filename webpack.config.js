@@ -1,6 +1,9 @@
 /**
  * webapack 代码打包工具
  * 概念： 1，entry: 入口、2，output：输出、3，loader: 加载器（webpack只能处理js，其他类型的文件需要引入其他模块去处理）、4，plugin：插件（增强webpack功能）、5，模式（运行环境）
+ * entry: 
+ *    Stinrg：单入口。aarray: 多入口，只形成一个chunk，再开发环境中让html的hmr生效，Object：多入口，形成多个chunk。
+ * 
  */
 
 const path = require('path');
@@ -29,7 +32,11 @@ module.exports = {
   output: {
     filename: 'bundle.js', // js/budil.js 这样旧指定了输出目录
     path: path.resolve(__dirname, 'dist'),
-    publicPath: './',
+    publicPath: '/', // 所有资源引入的公共路径前缀 exp： ’img/log.png‘ --> '/img/log.png'（以当前服务器地址去补充寻找，已经是绝对路径） 一般用于生产环境
+    chunkFilename: 'js/[name]_chunk.js', // 将非入口chunk的名称，例如import引入，呢么文件会单独成一个chunk，optimization分割的chunk也会单独有一个chunK
+    // LIbrary一般配合 dll使用
+    library: '[name]', // 整个库暴露出去的内容的名称  例如 module.exports = {}
+    library: 'window', // 指定添加的目标位置
   },
   module: {
     /**
@@ -87,7 +94,7 @@ module.exports = {
       //   test: /\.js$/,
       //   exclude: path.resolve(__dirname, 'node_modules'),
       //   enforce: "pre", // 优先执行，因为eslint先检查语法后再做js语法兼容
-      //   loader: "eslint-loader", // package.json中配置eslintConfig "eslintConfig": { "extends": "airbnb" } 
+      //   loader: "eslint-loader", // package.json中配置eslintConfig "eslintConfig": { "extends": "airbnb-base" } 
       //   options: {
       //     fix: false
       //   }
@@ -119,7 +126,9 @@ module.exports = {
                 }
               }
             ]
-          ]
+          ],
+          // 开启babel缓存  第二次构建时，会读取之前的缓存 这是对js的村里但是 我们还需要考虑跟更多，文件资源缓存则需要修改文件名 hash每次构建的时候会生成hash  chunkhash 入口hash  contenthash文件内容hash
+          cacheDirectory: true
         }
       }
     ]
@@ -129,6 +138,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       // alwaysWriteToDisk: true,
+      // filename: 'index[contenthash].html', //单页面应用没必要
       template: './src/index.html',
       minify: {
         collapseBooleanAttributes: true, //去空格
@@ -166,7 +176,7 @@ module.exports = {
   //   alias: {
   //     '@': path.resolve(__dirname,"src/static"),// 路径别名
   //     extensions: ['.js','json'],//配置省略文件路径的后缀名
-
+  //    modules: [path.resolve(__dirname,'../../node_modlues','node_module')] // 告诉Webpack解析模块去找哪个目录
   //   }
   // },
   mode: 'development', //如果改成Production 模式 那么则必须加publicPath 不否图片泽园访问不到
